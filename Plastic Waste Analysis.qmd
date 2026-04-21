@@ -27,7 +27,6 @@ The Environmental Plastic Waste Data comes from the **"Break Free from Plastic"*
 
 ```{r}
 #| label: read-in-temp-data
-
 # Read in Temperature data set
 temp <- read.csv("combined_temperature.csv")
 
@@ -35,24 +34,18 @@ temp <- temp |>
   filter(Year %in% (c(2019, 2020)),) |>
   rename(AnnualMeanTemp = Annual.Mean)
 
-
 # Show first 10 rows of temp data set
 head(temp, 10)
-
 ```
 
 The temperature data set includes data on the mean annual temperatures for all countries worldwide for the years 1901-2022, but we are particularly interested in the years 2019 and 2020. The 3-letter ISO code for each country is also included. We chose this data set because we wanted to explore how climate affects plastic degradation and consumption across different countries around the world.
 
+
 ## GDP Data Set (Additional Country-Level Data)
 
 ```{r}
-#| label: api-key
-
-my_key <- "8FzJfy67lKE4OUN74J48zZqI0x2ivVWkBPIRqN0K"
-```
-
-```{r}
 #| label: gdp-data-api
+#| eval: false
 get_gdp <- function(country, key = my_key) {
   safe_parse <- safely(
     function(country, key) {
@@ -89,25 +82,30 @@ get_gdp <- function(country, key = my_key) {
 get_gdp("Canada")
 ```
 
+```{r}
+#| label: combine-lists-into-df
+#| eval: false
+gdp <- map_dfr(unique(temp$Code), get_gdp)
+head(gdp, 10)
 ```
 
 ```{r}
-#| label: combine-lists-into-df
-gdp <- map_dfr(unique(temp$Code), get_gdp)
-head(gdp, 10)
-
+#| label: write-csv-gdp
+#| eval: false
+write_csv(x = gdp, file = "stat431-gdp")
 ```
-
-
 
 The original GDP data set includes historical, current, and predicted data on GDP for countries around the world for the years for 1980-2029. We are particularly interested in the years 2019 and 2020. The 3-letter ISO code for each country is also included. There are 5 variables measuring GDP in different ways. For example, the variable `gdp_per_capita_nominal` measures GDP by dividing the country's total value of finished goods and services by its total population. `gdp_nominal` is the nominal GDP in billions of US dollars and `gdp_growth` expresses the GDP growth rate as a percentage. 
 
+```{r}
+#| label: read-csv-gdp
+gdp <- read_csv("stat431-gdp")
+gdp
+```
 
 ## "Meta" Dataset: Combining Temperature, GDP, and Plastic Waste Data Sets
 
 ```{r}
-#| label: combine-temp-gdp-data
-
 #| label: combine-temp-gdp-data
 # Keep gdp_per_capita_nominal variable
 gdp_per_capita <- gdp |>
@@ -117,9 +115,7 @@ gdp_per_capita <- gdp |>
 combined_temp_gdp <- temp |>
   select(-X5.yr.smooth) |>
   left_join(gdp_per_capita, by = c("Code" = "country", "Year" = "year"))
-
 ```
-
 
 ```{r}
 #| label: clean-plastics
@@ -135,7 +131,6 @@ plastics_sum <- plastics |>
     .groups = "drop"
   )
 head(plastics_sum, 10)
-
 ```
 
 ```{r}
@@ -147,19 +142,15 @@ plastics_sum <- plastics_sum |>
   rename(Year = year, Country = country)
 
 head(plastics_sum, 10)
-
-
 ```
-
 
 ```{r}
 # Combine plastics data with temp/GDP
 meta_data <- inner_join(plastics_sum, combined_temp_gdp, by = c("Country", "Code", "Year"))
 head(meta_data, 10)
-
 ```
 
-
+### How does annual mean temperature affect total plastic count? 
 
 ```{r}
 #| label: data-summaries-viz-1
@@ -173,9 +164,9 @@ ggplot(data = meta_data, aes(x = AnnualMeanTemp, y = grand_total, color = factor
        color = "Year") + 
   scale_color_manual(values = c("2019" = "steelblue", "2020" = "lightcoral")) + 
   theme_classic()
-
-
 ```
+
+### Do countries with higher GDPs have more plastic counting events, and thus a higher total plastic count?
 
 ```{r}
 #| label: data-summaries-viz-2
@@ -189,8 +180,7 @@ ggplot(data = meta_data, aes(x = num_events, y = grand_total, color = factor(Yea
        size = "Nominal GDP per Capital") + 
   scale_color_manual(values = c("2019" = "steelblue", "2020" = "lightcoral")) + 
   theme_classic()
-
-
 ```
+
 
 
