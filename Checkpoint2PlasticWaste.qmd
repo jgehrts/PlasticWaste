@@ -2,6 +2,7 @@
 title: "Project 1 Checkpoint #1"
 format: html
 editor: visual
+embed-resources: true
 ---
 
 1.  Context of the Data
@@ -23,7 +24,7 @@ Using supplemental data: Do regions with higher population density produce more 
 ![](images/Screenshot%202026-04-07%20at%206.10.02%20PM.png)
 
 ```{r}
-
+library(tidyverse)
 ```
 
 **Checkpoint 2**

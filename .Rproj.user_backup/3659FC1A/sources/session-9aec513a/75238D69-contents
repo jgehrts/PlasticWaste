@@ -1,0 +1,41 @@
+---
+title: "Project 1 Checkpoint #1"
+format: html
+editor: visual
+---
+
+1.  Context of the Data
+
+```         
+The dataset comes from the Break Free From Plastic(BFFP), that collects and categorizes plastic waste from cleanup events. The data we are using includes observations from 2019-2020, and St. John's partially contributed to the global audit. The goal of the dataset is to identify the types of waste, brands that produces the plastic, and patterns in plastic pollution overtime and in varying locations.
+```
+
+2.  Data from 2019 and 2020 were combined into a single dataset, and column names were standardized. Some variables, such as grand_total, needed to be converted to numeric format, and duplicate/ inconsistent columns were corrected. The plastic type variables are in wide format, so they may need to be reshaped using pivot_longer() for easier analysis and visualization.
+
+3.  
+
+First 2 research questions: Is the amount of plastic collected influenced more by the number of volunteers or the number of cleanup event companies contribute the most to plastic pollution? Are certain types of plastic are disproportionately associated with specific parent companies?
+
+Using supplemental data: Do regions with higher population density produce more plastic waste during cleanup events? Do companies with higher global market share appear more frequently in plastic pollution data?
+
+![](images/Screenshot%202026-04-07%20at%206.10.02%20PM.png)
+
+```{r}
+# Get the Data
+
+# Read in with tidytuesdayR package 
+# Install from CRAN via: install.packages("tidytuesdayR")
+# This loads the readme and all the datasets for the week of interest
+
+# Either ISO-8601 date or year/week works!
+install.packages("tidytuesdayR")
+tuesdata <- tidytuesdayR::tt_load('2021-01-26')
+tuesdata <- tidytuesdayR::tt_load(2021, week = 5)
+
+plastics <- tuesdata$plastics
+
+# Or read in the data manually
+
+plastics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2021/2021-01-26/plastics.csv')
+
+```

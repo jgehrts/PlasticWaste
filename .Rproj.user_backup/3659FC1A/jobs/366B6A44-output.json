@@ -1,0 +1,7 @@
+[1,"Installing 'tidytuesdayR' ...\n"]
+[2,"trying URL 'https://cran.rstudio.com/bin/macosx/big-sur-arm64/contrib/4.5/tidytuesdayR_1.2.1.tgz'\n"]
+[2,"Content type 'application/x-gzip' length 258538 bytes (252 KB)\n============================"]
+[2,"======================\ndownloaded 252 KB\n\n"]
+[1,"The downloaded binary packages are in\n"]
+[1,"\t/var/folders/h2/nfs26g4d7yg8vw15gkr82p300000gn/T//RtmphcTawU/downloaded_packages\n"]
+[2,"\n\n✔ Package 'tidytuesdayR' successfully installed.\n"]
