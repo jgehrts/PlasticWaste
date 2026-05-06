@@ -382,30 +382,101 @@ plastic_temp_gdp |>
   summarise(grand_total = sum(grand_total, na.rm = TRUE), total_gdp = sum(gdp_per_capita_nominal, na.rm = TRUE)) |>
   mutate(percent = grand_total / sum(grand_total) * 100)
 ```
+```{r}
+#| fig-cap: “”
+#| fig-alt: “”
 
-Visualization
-
-New dataset with changes in gdp, temp, grand_total, 2020 minus 2019
-differences <- plastic_temp_gdp |>
-  filter(Year %in% c(2019, 2020)) |>
-  group_by(Country, continent, Year) |>
+rq1_long <- plastic_temp_gdp %>%
+  filter(Year %in% c(2019, 2020)) %>%
+  pivot_longer(
+    cols = c(hdpe, ldpe, o, pet, pp, ps, pvc),
+    names_to = "plastic_type",
+    values_to = "amount"
+  )
+rq1_summary <- rq1_long %>%
+  group_by(continent, plastic_type) %>%
   summarise(
-    AnnualMeanTemp = mean(AnnualMeanTemp, na.rm = TRUE),
-    grand_total = sum(grand_total, na.rm = TRUE),
-    gdp = sum(gdp_nominal, na.rm = TRUE),
+    total_amount = sum(amount, na.rm = TRUE),
     .groups = "drop"
-  ) |>
+  )
+
+rq1_prop_by_type <- rq1_summary %>%
+  group_by(plastic_type) %>%
+  mutate(prop = total_amount / sum(total_amount)) %>%
+  ungroup()
+
+rq1_wide_by_type <- rq1_prop_by_type %>%
+  select(continent, plastic_type, prop) %>%
   pivot_wider(
-    names_from = Year,
-    values_from = c(AnnualMeanTemp, grand_total, gdp),
-    names_sep = "_"
-  ) |>
-  mutate(
-    temp_change = AnnualMeanTemp_2020 - AnnualMeanTemp_2019,
-    grand_total_change = grand_total_2020 - grand_total_2019,
-    gdp_change = gdp_2020 - gdp_2019
-  ) |>
-  filter(!is.na(temp_change))
+    names_from = plastic_type,
+    values_from = prop
+  )
+
+```
+
+
+```{r}
+plastic_distribution_summary <- function(data, plastic_var, plastic_name) {
+  
+  data |>
+    mutate(
+      plastic_proportion = {{ plastic_var }} / grand_total
+    ) |>
+    group_by(continent) |>
+    summarize(
+      mean_proportion = mean(plastic_proportion, na.rm = TRUE),
+      median_proportion = median(plastic_proportion, na.rm = TRUE),
+      total_amount = sum({{ plastic_var }}, na.rm = TRUE),
+      .groups = "drop"
+    ) |>
+    arrange(desc(mean_proportion)) |>
+    gt() |>
+    tab_header(
+      title = paste(plastic_name, "Distribution Across Continents"),
+      subtitle = "Proportion of selected plastic type relative to total plastic collected"
+    ) |>
+    cols_label(
+      continent = "Continent",
+      mean_proportion = "Mean %",
+      median_proportion = "Median %",
+      total_amount = "Total Count"
+    ) |>
+    fmt_percent(
+      columns = c(mean_proportion, median_proportion),
+      decimals = 1
+    ) |>
+    fmt_number(
+      columns = total_amount,
+      decimals = 0
+    )
+}
+
+```
+
+
+
+
+```{r}
+#| fig-cap: “Figure 3.  ”
+#| fig-alt: “Figure 3. ”
+
+continent_plastic <- plastic_long %>%
+  group_by(continent, plastic_type) %>%
+  summarise(total_amount = sum(amount, na.rm = TRUE), .groups = "drop")
+
+ggplot(continent_plastic, aes(x = continent, y = total_amount, fill = plastic_type)) +
+  geom_col(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    title = "Plastic Type Composition by Continent",
+    x = "Continent",
+    y = "Proportion",
+    fill = "Plastic Type"
+  ) +
+  theme_classic()
+```
+
+```
 
 
 
